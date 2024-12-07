@@ -1,7 +1,8 @@
-const express = require('express');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const router = express.Router();
+import { Router } from 'express';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+
+const router = Router();
 
 // Configure Passport with Google OAuth
 passport.use(
@@ -12,47 +13,49 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK_URL
     },
     (accessToken, refreshToken, profile, done) => {
-      // Here, handle user information (e.g., save to DB or session)
-      console.log('Google Profile:', profile);
+      // Here, save or process the user information as needed
+      console.log('Authenticated User:', profile);
       return done(null, profile);
     }
   )
 );
 
-// Serialize User
+// Serialize and Deserialize User
 passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-// Deserialize User
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Google OAuth Routes
+// Google Login Route
 router.get(
   '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
+// Google Callback Route
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/auth/failure'
-  }),
+  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
   (req, res) => {
+    // Redirect to success page or main application
     res.redirect('/auth/success');
   }
 );
 
 // Success Route
 router.get('/success', (req, res) => {
-  res.send('Authentication Successful!');
+  res.json({
+    message: 'Authentication successful!',
+    user: req.user // Contains user info after login
+  });
 });
 
 // Failure Route
 router.get('/failure', (req, res) => {
-  res.send('Authentication Failed!');
+  res.status(401).json({ error: 'Authentication failed!' });
 });
 
-module.exports = router;
+export default router;
