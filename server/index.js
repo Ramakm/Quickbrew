@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import courseRoutes from './routes/courses.js';
+import OAuthRoutes from './routes/oauth.js'
+import helmet from 'helmet'
 
 dotenv.config();
 
@@ -13,12 +15,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Added helment for security headers
+app.use(helmet())
+
+const allowedOrigins = [`http://localhost:5173`]; // Hardcoded for now but in prod use env variables
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin))
+        return callback(null, true);
+      callback(new Error("Not allowed by CORS"));
+    },
+  })
+);
+
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/QuickBrew')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+.then(() => console.log('Connected to MongoDB'))
+.catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
+app.use('/api/get', OAuthRoutes)
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 
