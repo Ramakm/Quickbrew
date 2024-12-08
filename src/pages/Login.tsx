@@ -29,7 +29,7 @@ const Login = () => {
       if (data.success) {
           navigate('/dashboard');
         }
-      } else {
+      else {
         setError(data.message || 'Authentication failed');
       }
     } catch (error) {
