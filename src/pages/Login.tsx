@@ -10,7 +10,6 @@ const Login = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +27,7 @@ const Login = () => {
 
       if (data.success) {
           navigate('/dashboard');
-        }
+      }
       else {
         setError(data.message || 'Authentication failed');
       }
