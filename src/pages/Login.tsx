@@ -1,26 +1,65 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogIn, Loader } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { LogIn, Loader } from "lucide-react";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGoogleSuccess = async (credentialResponse: { code: string }) => {
+    try {
+      const response = await fetch(`${import.meta.env.BACKEND_SERVER_URL}/api/oauth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: credentialResponse.code })
+      });
+
+      const data: LoginResponse = await response.json();
+
+      if (data.success && data.data) {
+        // Store user and token
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.data.token);
+
+        // Optional: Redirect or update app state
+        console.log('Login successful', data.data.user);
+        return navigate('/dashboard')
+      } else {
+        // Handle login failure
+        setError(data.message || 'Authentication failed');
+        console.error('Login failed:', data.message);
+      }
+    } catch (error) {
+      // Network or parsing error
+      setError('An unexpected error occurred');
+      console.error('Login error:', error);
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setError('Google Sign-In was unsuccessful');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -28,19 +67,19 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || "Login failed");
       }
 
       // Store token in localStorage
-      localStorage.setItem('token', data.token);
-      
+      localStorage.setItem("token", data.token);
+
       // Redirect to pricing page for subscription
-      navigate('/pricing');
+      navigate("/pricing");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unexpected error occurred');
+        setError("An unexpected error occurred");
       }
     } finally {
       setLoading(false);
@@ -50,8 +89,14 @@ const Login = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
+  };
+
+  const handleOAuth = () => {
+    window.location.href = `${
+      import.meta.env.BACKEND_SERVER_URL
+    }/api/oauth/google`;
   };
 
   return (
@@ -65,14 +110,20 @@ const Login = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+            <div
+              className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative"
+              role="alert"
+            >
               {error}
             </div>
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -90,7 +141,10 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">
@@ -107,7 +161,7 @@ const Login = () => {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-row">
               <button
                 type="submit"
                 disabled={loading}
@@ -125,7 +179,19 @@ const Login = () => {
                   </>
                 )}
               </button>
-            </div>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+                flow='auth-code'
+              />
+              {error && (
+                <div className="error-message text-red-500 mt-2">
+                  {error}
+                </div>
+              )}
+            </GoogleOAuthProvider>
+          </div>
           </form>
         </div>
       </div>

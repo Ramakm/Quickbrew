@@ -1,21 +1,21 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import AIFeatures from './components/AIFeatures';
-import Testimonials from './components/Testimonials';
-import Footer from './components/Footer';
-import Login from './pages/Login';
-import GenerateMaterials from './pages/GenerateMaterials';
-import ChatWithDocuments from './pages/ChatWithDocuments';
-import InstantNotes from './pages/InstantNotes';
-import Pricing from './pages/Pricing';
-import Dashboard from './pages/Dashboard';
-import About from './pages/About';
-import Contact from './pages/Contact';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import AIFeatures from "./components/AIFeatures";
+import Testimonials from "./components/Testimonials";
+import Footer from "./components/Footer";
+import Login from "./pages/Login";
+import GenerateMaterials from "./pages/GenerateMaterials";
+import ChatWithDocuments from "./pages/ChatWithDocuments";
+import InstantNotes from "./pages/InstantNotes";
+import Pricing from "./pages/Pricing";
+import Dashboard from "./pages/Dashboard";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
@@ -25,14 +25,17 @@ function App() {
           <Navbar />
           <main>
             <Routes>
-              <Route path="/" element={
-                <>
-                  <Hero />
-                  <Features />
-                  <AIFeatures />
-                  <Testimonials />
-                </>
-              } />
+              <Route
+                path="/"
+                element={
+                  <>
+                    <Hero />
+                    <Features />
+                    <AIFeatures />
+                    <Testimonials />
+                  </>
+                }
+              />
               <Route path="/login" element={<Login />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
