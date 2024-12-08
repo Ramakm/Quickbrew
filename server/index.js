@@ -18,7 +18,7 @@ app.use(express.json());
 // Added helment for security headers
 app.use(helmet())
 
-const allowedOrigins = [`http://localhost:5173`]; // Hardcoded for now but in prod use env variables
+const allowedOrigins = [process.env.FRONTEND_SERVER_URL];
 
 app.use(
   cors({
@@ -37,7 +37,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/QuickBrew
 .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use('/api/get', OAuthRoutes)
+app.use('/api/oauth', OAuthRoutes)
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 

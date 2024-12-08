@@ -1,65 +1,80 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
+import { Router } from 'express';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/User.js';
 
-const router = express.Router();
+const router = Router();
 
-// Register
-router.post('/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+// Configure Google OAuth Strategy
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const { email, name } = profile._json;
+
+        // Find or create user
+        let user = await User.findOne({ email });
+
+        if (!user) {
+          user = new User({
+            name,
+            email,
+            password: 'google-oauth', // Placeholder password for OAuth users
+          });
+          await user.save();
+        }
+
+        return done(null, user);
+      } catch (err) {
+        console.error(err);
+        return done(err, null);
+      }
     }
-    
-    // Create new user
-    const user = new User({ name, email, password });
-    await user.save();
-    
-    // Generate JWT
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
-    );
-    
-    res.status(201).json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating user' });
+  )
+);
+
+// Serialize and Deserialize User
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
   }
 });
 
-// Login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'User not found' });
-    }
-    
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-    
-    // Generate JWT
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
-    );
-    
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Error logging in' });
+// Google OAuth Login Route
+router.get(
+  '/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Google OAuth Callback Route
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
+  (req, res) => {
+    res.redirect('/auth/success');
   }
+);
+
+// Success Route
+router.get('/success', (req, res) => {
+  res.json({data: { message: 'Authentication successful', user: req.user }});
+});
+
+// Failure Route
+router.get('/failure', (req, res) => {
+  res.status(401).json({ error: {message: 'Authentication failed'} });
 });
 
 export default router;
