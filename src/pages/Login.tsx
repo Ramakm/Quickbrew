@@ -24,23 +24,15 @@ const Login = () => {
         body: JSON.stringify({ code: credentialResponse.code })
       });
 
-      const data: LoginResponse = await response.json();
+      const data: AuthResponse = await response.json();
 
-      if (data.success && data.data) {
-        // Store user and token
-        localStorage.setItem('user', JSON.stringify(data.data.user));
-        localStorage.setItem('token', data.data.token);
-
-        // Optional: Redirect or update app state
-        console.log('Login successful', data.data.user);
-        return navigate('/dashboard')
+      if (data.success) {
+          navigate('/dashboard');
+        }
       } else {
-        // Handle login failure
         setError(data.message || 'Authentication failed');
-        console.error('Login failed:', data.message);
       }
     } catch (error) {
-      // Network or parsing error
       setError('An unexpected error occurred');
       console.error('Login error:', error);
     }
@@ -56,7 +48,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${import.meta.env.BACKEND_SERVER_URL}/api/oauth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
