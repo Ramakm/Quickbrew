@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Loader } from "lucide-react";
-import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,34 +11,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
-
-  const handleGoogleSuccess = async (credentialResponse: { code: string }) => {
-    try {
-      const response = await fetch(`${import.meta.env.BACKEND_SERVER_URL}/api/oauth/google`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code: credentialResponse.code })
-      });
-
-      const data: AuthResponse = await response.json();
-
-      if (data.success) {
-          navigate('/dashboard');
-      }
-      else {
-        setError(data.message || 'Authentication failed');
-      }
-    } catch (error) {
-      setError('An unexpected error occurred');
-      console.error('Login error:', error);
-    }
-  };
-
-  const handleGoogleFailure = () => {
-    setError('Google Sign-In was unsuccessful');
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,18 +141,6 @@ const Login = () => {
                   </>
                 )}
               </button>
-            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleFailure}
-                flow='auth-code'
-              />
-              {error && (
-                <div className="error-message text-red-500 mt-2">
-                  {error}
-                </div>
-              )}
-            </GoogleOAuthProvider>
           </div>
           </form>
         </div>
