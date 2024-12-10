@@ -1,34 +1,44 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("AuthCallback")
     const handleAuthCallback = async () => {
-      const params = new URLSearchParams(location.hash.slice(1))
-      const accessToken = params.get('access_token')
+      // Get the current URL
+      const currentUrl = new URL(window.location.href);
+      
+      // Check for error in URL parameters
+      const error = currentUrl.searchParams.get('error');
+      if (error) {
+        console.error('Authentication error:', error);
+        navigate('/login');
+        return;
+      }
 
-      console.log(accessToken)
+      // Attempt to get the session
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session retrieval error:', sessionError.message);
+        navigate('/login');
+        return;
+      }
 
-      if (accessToken) {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_URL}/api/oauth/callback?accessToken=${accessToken}`);
-        const data = await response.json();
-
-        if (data.error) {
-          console.error('Error during authentication:', data.error);
-        } else {
-          console.log('User authenticated:', data.user);
-          navigate('/dashboard'); // Redirect to dashboard
-        }
+      // Check if we have a valid session
+      if (data.session) {
+        navigate('/dashboard');
+      } else {
+        navigate('/login');
       }
     };
 
     handleAuthCallback();
   }, [navigate]);
 
-  return <div>Loading...</div>;
+  return <div>Authenticating... Please wait.</div>;
 };
 
 export default AuthCallback;
