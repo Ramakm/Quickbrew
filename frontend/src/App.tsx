@@ -16,6 +16,7 @@ import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import AuthCallback from './context/OAuthCallback'
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route path="/auth/callback" element={<AuthCallback />} />
             </Routes>
           </main>
           <Footer />
