@@ -29,7 +29,7 @@ const AuthCallback = () => {
 
       // Check if we have a valid session
       if (data.session) {
-        navigate('/dashboard');
+        navigate('/pricing');
       } else {
         navigate('/login');
       }
