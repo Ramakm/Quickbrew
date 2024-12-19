@@ -1,89 +1,75 @@
-import React from 'react';
-import { Book, MessageSquare, FileText, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+// import React from 'react';
+import { FileText, FileQuestion, MessageSquare, Plus, ChevronRight } from 'lucide-react';
+import Sidebar from '../components/dashboard/Sidebar';
+import StudyCard from '../components/dashboard/StudyCard';
+import FeatureCard from '../components/dashboard/FeatureCard';
 
 const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white h-screen fixed shadow-lg">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-purple-600">Quickbrew</h2>
-          </div>
-          <nav className="mt-6">
-            <Link
-              to="/dashboard"
-              className="flex items-center px-6 py-3 text-gray-700 bg-gray-100"
-            >
-              <Book className="h-5 w-5 mr-3" />
-              Dashboard
-            </Link>
-            <Link
-              to="/generate"
-              className="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50"
-            >
-              <MessageSquare className="h-5 w-5 mr-3" />
-              Study Materials
-            </Link>
-            <Link
-              to="/chat"
-              className="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50"
-            >
-              <FileText className="h-5 w-5 mr-3" />
-              Document Chat
-            </Link>
-            <Link
-              to="/notes"
-              className="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50"
-            >
-              <Settings className="h-5 w-5 mr-3" />
-              AI Notes
-            </Link>
-          </nav>
+      <Sidebar />
+      
+      <div className="ml-64 p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Welcome, Aiden Reeves</h1>
+          <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+            <Plus className="w-5 h-5" />
+            Create New Set
+          </button>
         </div>
 
-        {/* Main Content */}
-        <div className="ml-64 flex-1 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-8">Welcome to Quickbrew</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Quick Stats */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Study Materials</h3>
-              <p className="text-3xl font-bold text-purple-600">12</p>
-              <p className="text-gray-600">Generated this month</p>
-            </div>
+        <div className="flex gap-8">
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold mb-6">Continue Studying</h2>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Document Chats</h3>
-              <p className="text-3xl font-bold text-purple-600">45</p>
-              <p className="text-gray-600">Active conversations</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Notes</h3>
-              <p className="text-3xl font-bold text-purple-600">28</p>
-              <p className="text-gray-600">Notes generated</p>
+            <StudyCard
+              question="Which rule is used to differentiate the function y = c f(x)?"
+              options={[
+                "Constant rule",
+                "Product rule",
+                "Chain rule",
+                "Sum rule"
+              ]}
+              currentCard={1}
+              totalCards={3}
+            />
+
+            <div className="grid grid-cols-3 gap-6">
+              <FeatureCard
+                title="Magic Notes"
+                description="Create instant notes from any PDF, website, or image."
+                icon={<FileText className="w-6 h-6 text-white" />}
+                bgColor="bg-indigo-600"
+              />
+              
+              <FeatureCard
+                title="Chat with PDF"
+                description="Upload a PDF and start an AI conversation."
+                icon={<MessageSquare className="w-6 h-6 text-white" />}
+                bgColor="bg-blue-500"
+              />
+              
+              <FeatureCard
+                title="Magic Answers"
+                description="Get instant step-by-step answers to any question."
+                icon={<FileQuestion className="w-6 h-6 text-white" />}
+                bgColor="bg-emerald-500"
+              />
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
-            <div className="bg-white rounded-lg shadow-md">
-              <div className="p-4 border-b">
-                <p className="text-gray-600">Generated study materials for "Machine Learning Basics"</p>
-                <p className="text-sm text-gray-500">2 hours ago</p>
-              </div>
-              <div className="p-4 border-b">
-                <p className="text-gray-600">Chat session with "Advanced Physics" document</p>
-                <p className="text-sm text-gray-500">5 hours ago</p>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-600">Created AI notes from "History Lecture 3"</p>
-                <p className="text-sm text-gray-500">Yesterday</p>
-              </div>
+          <div className="w-80">
+            <div className="bg-indigo-50 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-indigo-900 mb-2">
+                Calculus Concepts
+              </h3>
+              <p className="text-indigo-700 mb-4">
+                Flashcards covering differential calculus concepts including differentiation rules, exponential and trigonometric functions, and shape of a graph.
+              </p>
+              <button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                Continue Studying
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>

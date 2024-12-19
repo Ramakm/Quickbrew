@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Loader } from "lucide-react";
+import { Provider } from '@supabase/supabase-js'
 
-import {supabase} from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,10 +12,9 @@ const Login = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
-  const handleOAuthLogin = async (provider) => {
+  const handleOAuthLogin = async (provider: Provider) => {
     setLoading(true)
     const { data, error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback` } });
       if (error) console.log('Error signing in with OAuth:', error.message);
@@ -45,7 +45,7 @@ const Login = () => {
       localStorage.setItem("token", data.token);
 
       // Redirect to pricing page for subscription
-      navigate("/pricing");
+      navigate("/Dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -63,7 +63,6 @@ const Login = () => {
       [e.target.name]: e.target.value,
     });
   };
-
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
