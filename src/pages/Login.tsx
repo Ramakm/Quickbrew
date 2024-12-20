@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Loader } from "lucide-react";
 
-import {supabase} from '../lib/supabase'
-
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -11,14 +9,43 @@ const Login = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [error, setError] = useState<string | null>(null);
 
-  const handleOAuthLogin = async (provider) => {
-    setLoading(true)
-    const { data, error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback` } });
-      if (error) console.log('Error signing in with OAuth:', error.message);
-      console.log(data)
+  const handleGoogleSuccess = async (credentialResponse: { code: string }) => {
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: credentialResponse.code })
+      });
+
+      const data: LoginResponse = await response.json();
+
+      if (data.success && data.data) {
+        // Store user and token
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.data.token);
+
+        // Optional: Redirect or update app state
+        console.log('Login successful', data.data.user);
+      } else {
+        // Handle login failure
+        setError(data.message || 'Authentication failed');
+        console.error('Login failed:', data.message);
+      }
+    } catch (error) {
+      // Network or parsing error
+      setError('An unexpected error occurred');
+      console.error('Login error:', error);
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setError('Google Sign-In was unsuccessful');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +54,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_URL}/api/oauth/login`, {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +72,7 @@ const Login = () => {
       localStorage.setItem("token", data.token);
 
       // Redirect to pricing page for subscription
-      navigate("/dashboard");
+      navigate("/pricing");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -64,6 +91,11 @@ const Login = () => {
     });
   };
 
+  const handleOAuth = () => {
+    window.location.href = `${
+      import.meta.env.BACKEND_SERVER_URL
+    }/api/oauth/google`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -127,7 +159,7 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-row">
               <button
                 type="submit"
                 disabled={loading}
@@ -145,25 +177,19 @@ const Login = () => {
                   </>
                 )}
               </button>
-              <button
-                type="button"
-                disabled={loading}
-                className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-                onClick={() => handleOAuthLogin('google')}
-              >              
-                {loading ? (
-                  <>
-                    <Loader className="animate-spin h-4 w-4 mr-2" />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign in with Google
-                  </>
-                )}
-              </button>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleFailure}
+          flow='auth-code'
+        />
+        {error && (
+          <div className="error-message text-red-500 mt-2">
+            {error}
           </div>
+        )}
+      </GoogleOAuthProvider>
+            </div>
           </form>
         </div>
       </div>

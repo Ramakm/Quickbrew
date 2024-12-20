@@ -42,6 +42,14 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/generate"
                 element={
                   <PrivateRoute>
@@ -65,14 +73,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
+              
               <Route path="/auth/callback" element={<AuthCallback />} />
             </Routes>
           </main>
